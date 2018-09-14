@@ -1,0 +1,16 @@
+{
+  "name": "learn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "learn_server.js",
+  "dependencies": {
+    "express": "^4.16.3",
+    "node-wikipedia": "^0.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
