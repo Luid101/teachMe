@@ -1,7 +1,7 @@
 {
   "name": "learn",
   "version": "1.0.0",
-  "description": "",
+  "description": "A website that reads wikipedia articles to you.",
   "main": "learn_server.js",
   "dependencies": {
     "cors": "^2.8.4",
@@ -13,6 +13,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Osemudiamen Edmond Umolu",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luid101/teachMe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Luid101/teachMe/issues"
+  },
+  "homepage": "https://github.com/Luid101/teachMe#readme"
 }
