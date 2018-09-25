@@ -2,6 +2,8 @@ const http = require('http');
 
 var express = require('express');
 
+var cors = require('cors');
+
 const hostname = '0.0.0.0';
 const port = 3000;
 
@@ -19,10 +21,15 @@ var s_port = 3001;
 
 var server = express();
 
+server.use(cors({origin: 'http://159.203.10.86:3000'}));
+
 // main server function
 server.get('/:request', function (req, res) {
+  
   var request = req.params.request;
-  res.send('From server: we got your request for "' + request  + '"');
+  
+  get_info_object(request, res);
+
 })
 
 // function to get info object
@@ -31,15 +38,43 @@ server.get('/:request', function (req, res) {
 // 	'title' : 'text',
 // 	'body'	: 'body-text'
 // }
-function get_info_object(concept){
+function get_info_object(concept, res){
+  
+  // get wikipedia
+  var wikipedia = require("node-wikipedia");
+
+  wikipedia.page.data(concept, { content : true }, function(response){
+    // show data
+    return_data(response, res);
+  });
 
 }
 
-// function to get sound object
-// Returns some kind of sound object
-// ???
-function get_voice_object(info_object){
+// get text of html
 
+// function to render output to screen
+function return_data(data, res){
+
+  console.log(data);
+  
+  var content = {
+    "title":"N/A",
+    "body" : "N/A"
+  }
+
+  try{
+    content = {
+      "title" : data["title"],
+      "body" : data["text"]["*"]
+    }
+  }catch(err){
+    var content = {
+      "title":"Sorry we couldn't find it",
+      "body" : "N/A"
+    }
+  }
+
+  res.send(content);
 }
 
 server.listen(s_port);

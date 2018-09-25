@@ -1,1 +1,285 @@
-Hello World from client.
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Teach Me</title>
+
+        <script src="speak-js/speakClient.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        
+        
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+
+        <script>
+
+            function stop_sound(id){
+                try{
+                    document.getElementById("player").pause();
+                }catch(err){
+
+                }
+                
+            }
+
+            function play_sound(id){
+
+                try{
+                    document.getElementById("player").play();
+                }catch(err){
+                    
+                }
+
+            }
+
+            function highlight_text(src_id, data, input_term){
+                var src_str = data.replace(/\s+/g, ' ');
+                console.log(src_str);
+                var collapsed = input_term.replace(/\s+/g, ' ');
+                console.log(collapsed);
+                var term = collapsed;
+                term = term.replace(/(\s+)/,"(<[^>]+>)*$1(<[^>]+>)*");
+                //term.replace()
+
+                try {
+                    var pattern = new RegExp("("+term+")", "gi");
+                }catch(e){
+                    console.log(e);
+                }
+                
+                src_str = src_str.replace(pattern, "<mark>$1</mark>");
+                src_str = src_str.replace(/(<mark>[^<>]*)((<[^>]+>)+)([^<>]*<\/mark>)/,"$1</mark>$2<mark>$4");
+
+                $("#" + src_id).html(src_str);
+            }   
+
+            function highlight_text2(src_id, text){
+
+                var query = new RegExp("(\\b" + text + "\\b)", "gim");
+                var e = document.getElementById(src_id).innerHTML;
+                var enew = e.replace(/(<span>|<\/span>)/igm, "");
+                document.getElementById(src_id).innerHTML = enew;
+                var newe = enew.replace(query, "<span>$1</span>");
+                document.getElementById(src_id).innerHTML = newe;
+
+            }
+
+            function display_curr_text( text_array, index, src_id){
+                var result = "";
+
+                var i;
+                for (i = 0; i < text_array.length; i++) { 
+                    if(i == index){
+                        result += '<span id="focus">' + text_array[i] + '</span>';
+                    }else{
+                        result += text_array[i];
+                    }
+                }
+
+                document.getElementById(src_id).innerHTML = result;
+            }
+
+            function get_result(){
+                
+                var request = document.getElementById("request").value; 
+
+                var url = "http://159.203.10.86:3001/" + request;
+
+                $.get(
+                    url,
+                    {},
+                    function(data) {
+                        // stop any previous audio and
+                        // clear any previous data
+                        stop_sound();
+                        //$("#audio").innerHTML = ""; 
+
+
+                        // show data 
+
+                        var content = "<h1>" + data['title'] + "</h1>";
+
+                        content += "\n" + data['body'];
+
+                        console.log(data);
+
+                        document.getElementById("result").innerHTML = content;
+
+                        // prepare text for speach
+                        var raw_text = $("#result").text()
+
+                        document.getElementById("result").innerHTML = raw_text;
+
+                        // use the voice reader
+                        //speak(raw_text)
+
+                        var index = 0;
+                        
+                        //var broken_text = raw_text.split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
+                        //var broken_text = raw_text.match(/.{1,5000}/g);//.split("/n").filter( function(e) { return e.trim().length > 0; } );
+                        var broken_text = raw_text.split('.');
+
+                        // handle loading for audio
+                        $('#loading').css("visibility", "visible");
+
+                        // // when the audio div has audio, stop playing
+                        // $('#audio audio').change(function(){
+                        //     console.log("a change was made to audio")
+                        //     $('#loading').css("visibility", "hidden");
+                        // });
+
+                        $("body").on('DOMSubtreeModified', "#audio", function() {
+                            // code here
+                            console.log("a change was made to audio")
+                            $('#loading').css("visibility", "hidden");
+
+                            // add a call back to when the player finishes
+                            // so I can call the synth again
+                            $("#player").bind('ended', function(){
+                                
+                                if(index < broken_text.length - 1){
+
+                                    index += 1;
+
+                                    console.log("player ended!");
+                                    $('#loading').css("visibility", "visible");
+                                    
+
+                                    console.log(index);
+
+                                    console.log(broken_text.length);
+
+                                    console.log(broken_text[index]);
+                                    
+                                    speak(broken_text[index]);
+                                    // highlight text being read
+                                    //highlight_text("result", raw_text, broken_text[index]);
+                                    display_curr_text( broken_text, index, "result");
+
+                                    
+                                }else{
+                                    $('#loading').css("visibility", "invisible");
+                                }
+
+                                
+                            });
+
+                        });
+
+                        console.log(broken_text[index]);
+
+                        speak(broken_text[index]);
+                        // highlight text being read
+                        //highlight_text("result", raw_text, broken_text[index]);
+                        display_curr_text( broken_text, index, "result");
+                        
+
+
+                        //  function run_again(event){
+                        //     console.log("Done");
+                        //     if (index < broken_text.length){
+                        //         index += 1
+                        //         speak(broken_text[index], run_again);
+                        //     }
+                        // }
+                        
+                        // var msg = new SpeechSynthesisUtterance(broken_text);
+                        // window.speechSynthesis.speak(msg);
+
+                        // function run_again(event){
+                        //     console.log("Done");
+                        //     if (index < broken_text.length){
+                        //         index += 1
+                        //         var msg = new SpeechSynthesisUtterance(broken_text[index]);
+                        //         window.speechSynthesis.speak(msg);
+                        //         msg.onend = run_again;
+                        //     }
+                        // }
+
+                        // msg.onend = run_again;
+                        
+                    }
+                );
+            }
+
+        </script>
+        
+        <style>
+
+            div {
+                width: 100%
+            }
+
+            #result {
+                /*white-space:pre;*/
+                width: 100%
+            }
+
+            .wordwrap { 
+                white-space: pre-wrap;      /* CSS3 */   
+                white-space: -moz-pre-wrap; /* Firefox */    
+                white-space: -pre-wrap;     /* Opera <7 */   
+                white-space: -o-pre-wrap;   /* Opera 7 */    
+                word-wrap: break-word;      /* IE */
+            }
+
+            #focus{
+                background-color: yellow;
+            }
+
+            main{
+                font-size: 30px
+            }
+
+            #loading {
+                width: 100%;
+                height: 100%;
+                top: 0px;
+                left: 0px;
+                position: fixed;
+                display: block;
+                opacity: 0.7;
+                background-color: #fff;
+                z-index: 99;
+                text-align: center;
+                visibility: hidden
+            }
+
+            #loading-image {
+                position: absolute;
+                top: 100px;
+                left: 240px;
+                z-index: 100;
+            }
+            
+        </style>
+    
+    </head>
+
+    <body>
+        <div id="audio"></div>
+        <div id="main" class="mx-auto" style="width: 400px;">
+            <h2> Welcome to "Teach Me".</h2>
+            <p> what concept would you like to learn about?</p>
+            <input type="text" id="request" placeholder="e.g. Contraceptives, Happy Feet, Happiness..." style="width: 300px">
+            <br>
+            <br>
+            <button type="button" onclick="get_result()">Learn!</button>
+            <button type="button" onclick="play_sound()" > Play Speech</button>
+            <button type="button" onclick="stop_sound()" > Pause Speech</button>
+            
+            <div id="loading">
+                <img id="loading-image" src="images/ajax-loader.gif" alt="Loading..." />
+            </div>
+
+        </div>
+
+        <br>
+
+        <div id="result" class="wordwrap">
+
+        </div>
+        
+    </body>
+</html>
