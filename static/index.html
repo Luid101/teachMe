@@ -12,6 +12,16 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
 
+
+        <!-- Bootstrap -->
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+
         <script>
 
             function stop_sound(id){
@@ -31,6 +41,50 @@
                     
                 }
 
+            }
+
+            function google_audio(audio_div_id, text){
+                // max text size = 100
+                // var audio = new Audio();
+                // document.getElementById(audio_div_id).innerHTML = audio;
+                // audio.src ='http://translate.google.com/translate_tts?ie=utf-8&tl=en&q='+ text;
+                // audio.play();
+
+                // make a post request
+                var s_data = {"input": 
+                                {"text":text},
+                            "audioConfig": 
+                                {"audioEncoding": "MP3"},
+                            "voice": 
+                                {"languageCode": "en"}
+                }; 
+
+                console.log(s_data);
+
+                // $.post(url = ,
+                //         data = s_data,
+                //         contentType = "application/json; charset=utf-8",
+                //         dataType = "json",
+                //         success = function(data){
+                //             console.log(data);
+                //         })
+
+                        function success(data){
+                            console.log(data);
+
+                                document.getElementById("audio").innerHTML=("<audio id=\"player\" src=\"data:audio/x-wav;base64,"+data["audioContent"]+"\">");
+                                document.getElementById("player").play();
+
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: "https://texttospeech.googleapis.com/v1/text:synthesize?key=AIzaSyD0bDTCYJWb9iHdDtTKJgARgfctqjY-1vY",
+                            contentType : "application/json; charset=utf-8",
+                            data: JSON.stringify(s_data),
+                            success: success,
+                            dataType: "json"
+                        });
             }
 
             function highlight_text(src_id, data, input_term){
@@ -107,7 +161,7 @@
                         document.getElementById("result").innerHTML = content;
 
                         // prepare text for speach
-                        var raw_text = $("#result").text()
+                        var raw_text = $("#result").text();
 
                         document.getElementById("result").innerHTML = raw_text;
 
@@ -117,7 +171,7 @@
                         var index = 0;
                         
                         //var broken_text = raw_text.split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
-                        //var broken_text = raw_text.match(/.{1,5000}/g);//.split("/n").filter( function(e) { return e.trim().length > 0; } );
+                        //var broken_text = raw_text.match(/.{1,100}/g);//.split("/n").filter( function(e) { return e.trim().length > 0; } );
                         var broken_text = raw_text.split('.');
 
                         // handle loading for audio
@@ -152,7 +206,8 @@
 
                                     console.log(broken_text[index]);
                                     
-                                    speak(broken_text[index]);
+                                    google_audio("audio", broken_text[index]);
+                                    //speak(broken_text[index]);
                                     // highlight text being read
                                     //highlight_text("result", raw_text, broken_text[index]);
                                     display_curr_text( broken_text, index, "result");
@@ -169,7 +224,8 @@
 
                         console.log(broken_text[index]);
 
-                        speak(broken_text[index]);
+                        google_audio("audio", broken_text[index]);
+                        //speak(broken_text[index]);
                         // highlight text being read
                         //highlight_text("result", raw_text, broken_text[index]);
                         display_curr_text( broken_text, index, "result");
@@ -259,16 +315,21 @@
 
     <body>
         <div id="audio"></div>
-        <div id="main" class="mx-auto" style="width: 400px;">
-            <h2> Welcome to "Teach Me".</h2>
-            <p> what concept would you like to learn about?</p>
+        <div id="main" class="mx-auto" style="/*width: 400px;*/" align="center">
+            <h2> Welcome to  <br>"Teach Me".</h2>
+            <h4> What concept would you like to learn about?</h4>
             <input type="text" id="request" placeholder="e.g. Contraceptives, Happy Feet, Happiness..." style="width: 300px">
             <br>
+            <p>(powered by wikipedia)</p>
+            <button type="button" onclick="get_result()" class="btn btn-primary" >Learn!</button>
+            <button type="button" onclick="play_sound()" class="btn btn-success"> Play Speech</button>
+            <button type="button" onclick="stop_sound()" class="btn btn-warning"> Pause Speech</button>
             <br>
-            <button type="button" onclick="get_result()">Learn!</button>
-            <button type="button" onclick="play_sound()" > Play Speech</button>
-            <button type="button" onclick="stop_sound()" > Pause Speech</button>
-            
+            <hr>
+            <text style="background-color:yellow">Note: still in testing phase, if you run into any problems please refresh the page.</text>
+	    <br/>
+	    <span> <a href="https://edmondumolu.me/?page=Projects">Other Projects by me</a> And <a href="https://github.com/Luid101/teachMe" >Link to Github Page</a> </span>
+
             <div id="loading">
                 <img id="loading-image" src="images/ajax-loader.gif" alt="Loading..." />
             </div>

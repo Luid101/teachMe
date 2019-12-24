@@ -17,11 +17,11 @@ app.listen(port);
 console.log("Running client side on port: " + port);
 
 // server setup
-var s_port = 3001;
+var s_port = port + 1;
 
 var server = express();
 
-server.use(cors({origin: 'http://159.203.10.86:3000'}));
+server.use(cors({origin: 'http://edmondumolu.me:3000'}));
 
 // main server function
 server.get('/:request', function (req, res) {
@@ -39,6 +39,8 @@ server.get('/:request', function (req, res) {
 // 	'body'	: 'body-text'
 // }
 function get_info_object(concept, res){
+
+  console.log({"got":concept});
   
   // get wikipedia
   var wikipedia = require("node-wikipedia");
@@ -55,7 +57,7 @@ function get_info_object(concept, res){
 // function to render output to screen
 function return_data(data, res){
 
-  console.log(data);
+  //console.log(data);
   
   var content = {
     "title":"N/A",
