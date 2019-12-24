@@ -6,7 +6,7 @@
   "dependencies": {
     "cors": "^2.8.4",
     "express": "^4.16.3",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.12",
     "node-wikipedia": "0.0.2",
     "say": "^0.15.0"
   },
